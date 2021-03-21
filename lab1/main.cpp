@@ -2,41 +2,58 @@
 #include <omp.h>
 #include <thread>
 #include <random>
+#include <functional>
+#include <array>
 
+#define ARRAY_SIZE 100000000
 #define NUM_OF_THREADS 8
-#define ARRAY_SIZE 10000000
 
-int main() {
-    long *arr = new long[ARRAY_SIZE];
-    for (int i = 0; i < ARRAY_SIZE; i++) {
-        arr[i] = random();
+std::vector<long> *getRandomArray(int arraySize) {
+    auto arr = new std::vector<long>(arraySize);
+    for (int i = 0; i < arraySize; i++) {
+        (*arr)[i] = random();
     }
+    return arr;
+}
 
-    auto t_start = std::chrono::high_resolution_clock::now();
+long measureTimeMillis(const std::function<void()> &fun) {
+    auto start = std::chrono::high_resolution_clock::now();
+    fun();
+    auto end = std::chrono::high_resolution_clock::now();
+    return std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+}
+
+long long sumSequential(const std::vector<long> &arr) {
     long long sum = 0;
-    for (int i = 0; i < ARRAY_SIZE; i++) {
-        sum += arr[i];
+    for (long i : arr) {
+        sum += i;
     }
-    auto t_end = std::chrono::high_resolution_clock::now();
-    std::cout << std::chrono::duration<double, std::milli>(t_end - t_start).count() << std::endl;
+    return sum;
+}
 
-    auto t2_start = std::chrono::high_resolution_clock::now();
-    long sum2 = 0;
-#pragma omp parallel num_threads(NUM_OF_THREADS) default(none) shared(arr, sum2)
+long long sumParallel(const std::vector<long> &arr, int numOfThreads) {
+    long long sum = 0;
+#pragma omp parallel num_threads(numOfThreads) default(none) shared(arr, sum)
     {
         long long cumulativeSum = 0;
 #pragma omp for
-        for (int i = 0; i < ARRAY_SIZE; i++) {
-            cumulativeSum += arr[i];
+        for (long i : arr) {
+            cumulativeSum += i;
         }
 #pragma omp atomic
-        sum2 += cumulativeSum;
+        sum += cumulativeSum;
     }
-    auto t2_end = std::chrono::high_resolution_clock::now();
-    std::cout << std::chrono::duration<double, std::milli>(t2_end - t2_start).count() << std::endl;
+    return sum;
+}
 
-    std::cout << (sum == sum2) << std::endl;
+int main() {
+    auto arr = getRandomArray(ARRAY_SIZE);
 
-    delete[] arr;
+    long long sumSequentialResult, sumParallelResult;
+    std::cout << measureTimeMillis([&] { sumSequentialResult = sumSequential(*arr); }) << std::endl;
+    std::cout << measureTimeMillis([&] { sumParallelResult = sumParallel(*arr, NUM_OF_THREADS); }) << std::endl;
+    std::cout << (sumParallelResult == sumParallelResult ? "OK" : "FAIL");
+
+    delete arr;
     return 0;
 }
