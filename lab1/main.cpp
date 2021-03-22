@@ -33,15 +33,12 @@ long long sumSequential(const std::vector<long> &arr) {
 
 long long sumParallel(const std::vector<long> &arr, int numOfThreads) {
     long long sum = 0;
-#pragma omp parallel num_threads(numOfThreads) default(none) shared(arr, sum)
+#pragma omp parallel num_threads(numOfThreads) reduction (+:sum) default(none) shared(arr)
     {
-        long long cumulativeSum = 0;
-#pragma omp for
+#pragma omp for schedule(static)
         for (long i : arr) {
-            cumulativeSum += i;
+            sum += i;
         }
-#pragma omp atomic
-        sum += cumulativeSum;
     }
     return sum;
 }
