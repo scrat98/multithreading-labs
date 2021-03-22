@@ -2,20 +2,12 @@
 
 #include <cmath>
 
-DeterminantCalculator::~DeterminantCalculator() {
-
-}
-
-DeterminantCalculator::DeterminantCalculator(omp_sched_t scheduleType, int numOfThreads) {
-
-}
-
-float DeterminantCalculator::calculate(Matrix matrix) {
+float DeterminantCalculator::calculate(Matrix matrix) const {
     int matrixSize = matrix.size();
     float det = 1;
     for (int i = 0; i < matrixSize; i++) {
         int maxPos = i;
-        #pragma omp parallel default(none) shared(matrix, maxPos, i, matrixSize) num_threads(this->numOfThreads)
+        #pragma omp parallel default(none) shared(matrix, maxPos, i, matrixSize) num_threads(numOfThreads)
         {
             int localMaxPos = maxPos;
             #pragma omp for schedule(static)
@@ -44,7 +36,7 @@ float DeterminantCalculator::calculate(Matrix matrix) {
         }
         det *= matrix[i][i];
 
-        #pragma omp parallel for schedule(static) default(none) shared(matrix, i, matrixSize) num_threads(numOfThreads)
+        #pragma omp parallel for default(none) schedule(static) shared(matrix, i, matrixSize) num_threads(numOfThreads)
         for (int j = i + 1; j < matrixSize; ++j) {
             float mul = -matrix[j][i] / matrix[i][i];
             for (int k = i; k < matrixSize; ++k) {
