@@ -1,37 +1,18 @@
-#include <iostream>
+#include <cstdio>
+#include <fstream>
+#include <string>
 #include "DeterminantCalculator.hpp"
 #include "utils.h"
 
-int main() {
-//    Matrix matrix = {
-//            {1,   2,   8.8, 9.9},
-//            {3.0, 4.0, 3.3, 4.4},
-//            {2.0, 5.2, 2.2, 5.5},
-//            {6.3, 7.8, 6.3, 7.8}
-//    };
-    srand(time(NULL));
-    int matrixSize = 1500;
-    auto matrix = Matrix(matrixSize);
-    for (int i = 0; i < matrixSize; ++i) {
-        matrix[i].resize(matrixSize);
-        for (int j = 0; j < matrixSize; ++j) {
-            matrix[i][j] = 10.0 * rand() / RAND_MAX;
-        }
-    }
-    for (int i = 0; i < matrix.size(); i++) {
-        for (int j = 0; j < matrix.size(); j++) {
-            std::cout << matrix[i][j] << ' ';
-        }
-        std::cout << std::endl;
-    }
-
-    bool useOMP = true;
-    omp_sched_t scheduleType = omp_sched_static;
-    int numOfThreads = 0;
+void run(const Matrix &matrix, int numOfThreads) {
+    bool useOmp = numOfThreads != -1;
 
     DeterminantCalculator *detCalculator;
-    if (useOMP) {
-        detCalculator = DeterminantCalculator::withOMP(scheduleType, numOfThreads);
+    if (useOmp) {
+        if(numOfThreads < 0) {
+            throw std::invalid_argument("Wrong number of threads. Must be -1(omp disabled), 0(default) or greater than.");
+        }
+        detCalculator = DeterminantCalculator::withOMP(numOfThreads);
     } else {
         detCalculator = DeterminantCalculator::withoutOMP();
     }
@@ -39,10 +20,40 @@ int main() {
     float det;
     auto elapsedTime = measureTimeMillis([&] { det = detCalculator->calculate(matrix); });
 
-    std::cout << "Determinant: " << det << std::endl;
-    std::cout << "Time (8 thread(s)): " << elapsedTime << "ms" << std::endl;
+    std::printf("Determinant: %f\n", det);
+    std::printf("Time (%d thread(s)): %ldms\n", numOfThreads, elapsedTime);
 
     delete detCalculator;
+}
 
+int main(int argc, char *argv[]) {
+    try {
+        if (argc != 3) {
+            throw std::invalid_argument("Wrong number of arguments. Must be in format <matrix file> <number of threads>");
+        }
+
+        auto matrixFileName = std::string(argv[1]);
+        std::ifstream matrixFile(matrixFileName);
+        int numOfThreads = atoi(argv[2]);
+        if (!matrixFile.is_open()) {
+            throw std::runtime_error("Could not open the matrix file: " + matrixFileName);
+        }
+
+        int matrixSize;
+        matrixFile >> matrixSize;
+        Matrix matrix(matrixSize);
+        for (int i = 0; i < matrixSize; ++i) {
+            matrix[i].resize(matrixSize);
+            for (int j = 0; j < matrixSize; ++j) {
+                matrixFile >> matrix[i][j];
+            }
+        }
+        run(matrix, numOfThreads);
+
+        matrixFile.close();
+    } catch (const std::exception &e) {
+        std::fprintf(stderr, "The program was aborted: %s", e.what());
+        return 1;
+    }
     return 0;
 }

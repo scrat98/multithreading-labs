@@ -8,7 +8,7 @@ typedef std::vector<std::vector<float>> Matrix;
 
 class DeterminantCalculator {
 public:
-    static DeterminantCalculator *withOMP(omp_sched_t scheduleType = omp_sched_auto, unsigned int numOfThreads = 0) {
+    static DeterminantCalculator *withOMP(unsigned int numOfThreads = 0, omp_sched_t scheduleType = omp_sched_auto) {
         return new DeterminantCalculator(scheduleType, numOfThreads);
     }
 
