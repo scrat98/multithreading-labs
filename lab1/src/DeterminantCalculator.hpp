@@ -21,6 +21,8 @@ public:
     float calculate(Matrix matrix) const;
 
 private:
+    inline static const float FLOAT_PRECISION = 1e-7;
+
     DeterminantCalculator(omp_sched_t scheduleType, int numOfThreads) : scheduleType(scheduleType),
                                                                         numOfThreads(numOfThreads),
                                                                         useOmp(true) {};

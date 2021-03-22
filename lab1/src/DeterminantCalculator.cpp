@@ -25,7 +25,7 @@ float DeterminantCalculator::calculate(Matrix matrix) const {
             }
         }
 
-        if (std::abs(matrix[maxPos][i]) == 0.0) {
+        if (std::abs(matrix[maxPos][i]) < FLOAT_PRECISION) {
             det = 0;
             break;
         }
