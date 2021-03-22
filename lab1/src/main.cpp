@@ -10,7 +10,7 @@ int main() {
 //            {6.3, 7.8, 6.3, 7.8}
 //    };
     srand(time(NULL));
-    int matrixSize = 7;
+    int matrixSize = 1500;
     auto matrix = Matrix(matrixSize);
     for (int i = 0; i < matrixSize; ++i) {
         matrix[i].resize(matrixSize);
@@ -24,7 +24,17 @@ int main() {
         }
         std::cout << std::endl;
     }
-    auto detCalculator = DeterminantCalculator::withOMP(omp_sched_auto, 8);
+
+    bool useOMP = true;
+    omp_sched_t scheduleType = omp_sched_static;
+    int numOfThreads = 0;
+
+    DeterminantCalculator *detCalculator;
+    if (useOMP) {
+        detCalculator = DeterminantCalculator::withOMP(scheduleType, numOfThreads);
+    } else {
+        detCalculator = DeterminantCalculator::withoutOMP();
+    }
 
     float det;
     auto elapsedTime = measureTimeMillis([&] { det = detCalculator->calculate(matrix); });
