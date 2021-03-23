@@ -20,14 +20,18 @@ Matrix *getRandomMatrix(int matrixSize) {
 }
 
 int main() {
-    std::vector<int> numberOfThreadsToTest = {1, 2, 4, 6, 8, 16};
-    auto matrix = getRandomMatrix(3000);
+    std::vector<int> numberOfThreadsToTest = {0, 1, 2, 4, 6, 8, 16};
 
-    for (int numberOfThreads: numberOfThreadsToTest) {
-        auto det = DeterminantCalculator::withOMP(numberOfThreads);
-        auto elapsedTime = measureTimeMillis([&] { det->calculate(*matrix); });
-        std::printf("Threads: %d, Time: %ld\n", numberOfThreads, elapsedTime);
+    for (int matrixSize = 10; matrixSize < 2500; matrixSize += 10) {
+        auto matrix = getRandomMatrix(matrixSize);
+        std::printf("Matrix size: %d\n", matrixSize);
+
+        for (int numberOfThreads: numberOfThreadsToTest) {
+            auto det = DeterminantCalculator::withOMP(numberOfThreads);
+            auto elapsedTime = measureTimeMillis([&] { det->calculate(*matrix); });
+            std::printf("Threads: %d, Time: %ld\n", numberOfThreads, elapsedTime);
+        }
+
+        delete matrix;
     }
-
-    delete matrix;
 }
