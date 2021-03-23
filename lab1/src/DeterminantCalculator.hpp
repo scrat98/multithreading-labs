@@ -8,8 +8,8 @@ typedef std::vector<std::vector<float>> Matrix;
 
 class DeterminantCalculator {
 public:
-    static DeterminantCalculator *withOMP(unsigned int numOfThreads = 0, omp_sched_t scheduleType = omp_sched_auto) {
-        return new DeterminantCalculator(numOfThreads, scheduleType);
+    static DeterminantCalculator *withOMP(unsigned int numOfThreads = 0) {
+        return new DeterminantCalculator(numOfThreads);
     }
 
     static DeterminantCalculator *withoutOMP() {
@@ -23,15 +23,13 @@ public:
 private:
     inline static const float FLOAT_PRECISION = 1e-7;
 
-    DeterminantCalculator(unsigned int numOfThreads, omp_sched_t scheduleType) : numOfThreads(numOfThreads),
-                                                                                 scheduleType(scheduleType),
-                                                                                 useOmp(true) {};
+    DeterminantCalculator(unsigned int numOfThreads) : numOfThreads(numOfThreads),
+                                                       useOmp(true) {};
 
     DeterminantCalculator() : useOmp(false) {};
 
     bool useOmp;
     unsigned int numOfThreads;
-    omp_sched_t scheduleType;
 };
 
 #endif /* DeterminantCalculator.h */
