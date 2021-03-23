@@ -1,8 +1,8 @@
 #include <cstdio>
 #include <fstream>
 #include <string>
-#include "DeterminantCalculator.hpp"
-#include "utils.h"
+#include "../src/DeterminantCalculator.hpp"
+#include "../src/utils.h"
 
 void run(const Matrix &matrix, int numOfThreads) {
     bool useOmp = numOfThreads != -1;
