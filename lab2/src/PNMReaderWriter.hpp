@@ -16,6 +16,10 @@ struct ImageData {
     ) : magicNumber(magicNumber),
         width(width), height(height), maxValue(maxValue),
         pixelData(pixelData), dataSize(dataSize) {}
+
+    ~ImageData() {
+        delete[] pixelData;
+    }
 };
 
 class PNMReaderWriter {
