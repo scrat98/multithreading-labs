@@ -4,10 +4,9 @@
 
 void PNMAutoBrightener::correctImage(const ImageData &imageData) const {
     int histogram[256] = {0};
-    #pragma omp parallel for if(useOmp) schedule(static) default(none) shared(histogram, imageData) num_threads(numOfThreads)
+    #pragma omp parallel for if(useOmp) schedule(static) default(none) shared(imageData) num_threads(numOfThreads) reduction(+:histogram)
     for (int i = 0; i < imageData.dataSize; i++) {
         auto pixel = imageData.pixelData[i];
-        #pragma omp atomic
         histogram[pixel]++;
     }
 
