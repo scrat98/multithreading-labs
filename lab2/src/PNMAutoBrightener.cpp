@@ -25,6 +25,10 @@ void PNMAutoBrightener::correctImage(const ImageData &imageData) const {
         max--;
     }
 
+    if (max == min) {
+        return;
+    }
+
     #pragma omp parallel for if(useOmp) schedule(static) default(none) shared(min, max, imageData) num_threads(numOfThreads)
     for (int i = 0; i < imageData.dataSize; i++) {
         auto transformedPixel = (imageData.pixelData[i] - min) * 255 / (max - min);
