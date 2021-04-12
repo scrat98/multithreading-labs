@@ -24,7 +24,7 @@ void PNMAutoBrightener::correctImage(const ImageData &imageData) const {
         max--;
     }
 
-    if (max == min) {
+    if (max == min || (min == 0 && max == 255)) {
         return;
     }
 
