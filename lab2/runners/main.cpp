@@ -2,6 +2,7 @@
 #include <string>
 #include "../src/PNMReaderWriter.hpp"
 #include "../src/PNMAutoBrightener.hpp"
+#include "../src/utils.h"
 
 void run(const std::string &inFilePath, const std::string &outFilePath, int numOfThreads) {
     bool useOmp = numOfThreads != -1;
@@ -16,8 +17,10 @@ void run(const std::string &inFilePath, const std::string &outFilePath, int numO
     }
 
     auto imageData = PNMReaderWriter::readFromFile(inFilePath);
-    autoBrightener->correctImage(*imageData);
+    auto elapsedTime = measureTimeMillis([&] { autoBrightener->correctImage(*imageData); });
     PNMReaderWriter::writeToFile(outFilePath, *imageData);
+
+    std::printf("Time (%d thread(s)): %lfms\n", numOfThreads, elapsedTime);
 
     delete imageData;
     delete autoBrightener;
