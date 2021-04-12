@@ -8,7 +8,7 @@
 ImageData *getImageData(int imageSize) {
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_int_distribution<unsigned char> dis(0, UINT8_MAX);
+    std::uniform_int_distribution<unsigned char> dis(10, UINT8_MAX - 10);
 
     int dataSize = imageSize * imageSize;
     auto imageData = new unsigned char[dataSize];
@@ -29,13 +29,29 @@ int main() {
 
         for (int numberOfThreads: numberOfThreadsToTest) {
             auto autoBrightener = PNMAutoBrightener::withOMP(numberOfThreads);
-            auto elapsedTimeAvg = measureAvgTimeMillis([&] { autoBrightener->correctImage(*imageData); });
+            auto elapsedTimeAvg = measureAvgTimeMillis([&] {
+                auto pixelDataCopy = new unsigned char[imageData->dataSize];
+                std::copy(imageData->pixelData, imageData->pixelData + imageData->dataSize, pixelDataCopy);
+                auto imageDataCopy = ImageData(imageData->magicNumber,
+                                               imageData->width, imageData->height, imageData->maxValue,
+                                               pixelDataCopy, imageData->dataSize
+                );
+                autoBrightener->correctImage(imageDataCopy);
+            });
             std::printf("Threads: %d, Time: %lf\n", numberOfThreads, elapsedTimeAvg);
             results[imageSize][numberOfThreads] = elapsedTimeAvg;
         }
 
         auto autoBrightener = PNMAutoBrightener::withoutOMP();
-        auto elapsedTimeAvg = measureAvgTimeMillis([&] { autoBrightener->correctImage(*imageData); });
+        auto elapsedTimeAvg = measureAvgTimeMillis([&] {
+            auto pixelDataCopy = new unsigned char[imageData->dataSize];
+            std::copy(imageData->pixelData, imageData->pixelData + imageData->dataSize, pixelDataCopy);
+            auto imageDataCopy = ImageData(imageData->magicNumber,
+                                           imageData->width, imageData->height, imageData->maxValue,
+                                           pixelDataCopy, imageData->dataSize
+            );
+            autoBrightener->correctImage(imageDataCopy);
+        });
         std::printf("Threads: -1, Time: %lf\n", elapsedTimeAvg);
         results[imageSize][-1] = elapsedTimeAvg;
 
