@@ -1,17 +1,19 @@
-#include <CL/cl.h>
+#include "../src/DeviceProvider.hpp"
 
 int main(int argc, char *argv[]) {
+    try {
+        auto devices = DeviceProvider::getAll();
+        if (devices.empty()) {
+            throw std::runtime_error("No devices found");
+        }
 
-    cl_int errorCode;
+        auto device = devices[0];
+        auto context = "";
 
-    // get platforms
-    cl_uint numPlatforms;
-    errorCode = clGetPlatformIDs(0, nullptr, &numPlatforms);
-
-    auto *platforms = new cl_platform_id[numPlatforms];
-    errorCode = clGetPlatformIDs(numPlatforms, platforms, nullptr);
-
-    // get devices
+    } catch (const std::exception &e) {
+        std::fprintf(stderr, "The program was aborted: %s", e.what());
+        return 1;
+    }
 
     return 0;
 }
