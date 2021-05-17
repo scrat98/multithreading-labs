@@ -12,6 +12,22 @@ enum class MultiplicatorKernelType {
 
 class MatrixMultiplicatorKernel {
 private:
+    /*
+     * Warp size for devices:
+     * Nvidia: 32
+     * AMD: 32/64
+     * Intel: variable
+     *
+     * Minimum CUDA cores (ALV) = 256
+     *
+     * We have 2 dimensions => local group dimension size = sqrt(256) = 16
+     *
+     * Example:
+     * Nvidia GTX 1650
+     * CUDA cores = 896 => Local-shared groups 896 / 32 = 28
+     */
+    static const int LOCAL_GROUP_DIMENSION_SIZE = 16;
+
     const Device &device;
     MultiplicatorKernelType kernelType;
     cl::Context context;
@@ -24,6 +40,10 @@ private:
         }
 
         return "/home/ct/projects/multithreading-labs/lab3/src/kernels/" + kernelFileName + ".cl";
+    }
+
+    static int roundUp(int numToRound, int multiple) {
+        return ((numToRound + multiple - 1) / multiple) * multiple;
     }
 
 public:
@@ -63,7 +83,14 @@ public:
         cl::CommandQueue queue(context, device.getCLDevice());
         queue.enqueueWriteBuffer(buffer_a, CL_FALSE, 0, sizeof(float) * m * k, matrixA);
         queue.enqueueWriteBuffer(buffer_b, CL_FALSE, 0, sizeof(float) * k * n, matrixB);
-        queue.enqueueNDRangeKernel(multiply_matrix, cl::NullRange, cl::NDRange(m, n), cl::NullRange);
+        queue.enqueueNDRangeKernel(multiply_matrix,
+                                   cl::NullRange,
+                                   cl::NDRange(
+                                           roundUp(m, LOCAL_GROUP_DIMENSION_SIZE),
+                                           roundUp(n, LOCAL_GROUP_DIMENSION_SIZE)
+                                   ),
+                                   cl::NDRange(LOCAL_GROUP_DIMENSION_SIZE, LOCAL_GROUP_DIMENSION_SIZE)
+        );
         queue.enqueueReadBuffer(buffer_c, CL_TRUE, 0, sizeof(float) * m * n, matrixC);
         queue.finish();
 
