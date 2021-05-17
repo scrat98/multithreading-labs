@@ -26,7 +26,7 @@ public:
 
         auto openCLDevices = getOpenCLDevices();
         for (auto &it: openCLDevices) {
-            devices.emplace_back(&it);
+            devices.emplace_back(it);
         }
 
         return devices;

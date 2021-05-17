@@ -14,3 +14,4 @@ endfunction()
 file(GLOB SOURCE_FILES src/*.cpp src/*.*h*)
 
 build_with_openCL(lab3 runners/main.cpp ${SOURCE_FILES})
+build_with_openCL(lab3_unit_tests runners/unitTests.cpp ${SOURCE_FILES})
