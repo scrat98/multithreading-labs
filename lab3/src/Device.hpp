@@ -5,30 +5,30 @@
 #include "OpenCL.h"
 
 enum DeviceType {
-    CPU,
-    GPU_INTEGRATED,
     GPU_DEDICATED,
+    GPU_INTEGRATED,
+    CPU,
     CUSTOM
 };
 
 class Device {
 private:
-    const cl::Device &clDevice;
+    cl::Device *clDevice;
     std::string deviceName;
     DeviceType deviceType;
 
-    static std::string getDeviceName(const cl::Device &clDevice) {
-        return clDevice.getInfo<CL_DEVICE_NAME>();
+    static std::string getDeviceName(cl::Device *clDevice) {
+        return clDevice->getInfo<CL_DEVICE_NAME>();
     }
 
-    static DeviceType getDeviceType(const cl::Device &clDevice) {
-        auto deviceType = clDevice.getInfo<CL_DEVICE_TYPE>();
+    static DeviceType getDeviceType(cl::Device *clDevice) {
+        auto deviceType = clDevice->getInfo<CL_DEVICE_TYPE>();
         if (deviceType == CL_DEVICE_TYPE_CPU) {
             return DeviceType::CPU;
         }
 
         if (deviceType == CL_DEVICE_TYPE_GPU) {
-            auto isIntegrated = clDevice.getInfo<CL_DEVICE_HOST_UNIFIED_MEMORY>();
+            auto isIntegrated = clDevice->getInfo<CL_DEVICE_HOST_UNIFIED_MEMORY>();
             if (isIntegrated == CL_TRUE) {
                 return DeviceType::GPU_INTEGRATED;
             } else {
@@ -40,12 +40,13 @@ private:
     }
 
 public:
-    explicit Device(const cl::Device &clDevice) : clDevice(clDevice) {
+    explicit Device(cl::Device *clDevice) {
+        this->clDevice = clDevice;
         this->deviceName = getDeviceName(clDevice);
         this->deviceType = getDeviceType(clDevice);
     }
 
-    const cl::Device &getCLDevice() const {
+    const cl::Device *getCLDevice() const {
         return this->clDevice;
     }
 

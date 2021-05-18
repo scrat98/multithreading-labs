@@ -49,9 +49,11 @@ int main() {
                 multiplySimple(matrixA, matrixB, matrixC, m, n, k);
 
                 auto devices = DeviceProvider::getAll();
-                auto device = devices[2];
+                auto device = devices.front();
 
-                runKernel(device, kernelType, m, n, k, matrixA, matrixB, [&](float *result) {
+                runKernel(device, kernelType, m, n, k, matrixA, matrixB, [&](
+                        float *result, cl::Event * profilingEvent, long executionTime
+                ) {
                     for (int i = 0; i < n * m; i++) {
                         auto expected = matrixC[i];
                         auto actual = result[i];
@@ -66,4 +68,8 @@ int main() {
             }
         }
     }
+
+    delete[] matrixA;
+    delete[] matrixB;
+    delete[] matrixC;
 }

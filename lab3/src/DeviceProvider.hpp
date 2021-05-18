@@ -2,6 +2,7 @@
 #define MULTITHREADING_LABS_DEVICE_PROVIDER_HPP
 
 #include <vector>
+#include <algorithm>
 #include "Device.hpp"
 
 class DeviceProvider {
@@ -26,9 +27,12 @@ public:
 
         auto openCLDevices = getOpenCLDevices();
         for (auto &it: openCLDevices) {
-            devices.emplace_back(it);
+            devices.emplace_back(&it);
         }
 
+        std::sort(devices.begin(), devices.end(), [](const Device &a, const Device &b) {
+            return a.getDeviceType() < b.getDeviceType();
+        });
         return devices;
     }
 };
