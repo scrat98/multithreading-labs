@@ -8,6 +8,7 @@
 
 enum class MultiplicatorKernelType {
     NAIVE,
+    TILING
 };
 
 class MatrixMultiplicatorKernel {
@@ -37,6 +38,8 @@ private:
         std::string kernelFileName;
         if (kernelType == MultiplicatorKernelType::NAIVE) {
             kernelFileName = "naive";
+        } else if (kernelType == MultiplicatorKernelType::TILING) {
+            kernelFileName = "tiling";
         }
 
         return "/home/ct/projects/multithreading-labs/lab3/src/kernels/" + kernelFileName + ".cl";
@@ -49,7 +52,7 @@ private:
 public:
 
     explicit MatrixMultiplicatorKernel(const Device &device,
-                                       MultiplicatorKernelType kernelType = MultiplicatorKernelType::NAIVE
+                                       MultiplicatorKernelType kernelType = MultiplicatorKernelType::TILING
     ) : device(device) {
         this->kernelType = kernelType;
         this->context = cl::Context(device.getCLDevice());

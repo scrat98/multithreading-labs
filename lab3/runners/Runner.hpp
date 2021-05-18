@@ -7,7 +7,8 @@
 #include <exception>
 #include <cstdio>
 
-int runKernel(const Device &device, MultiplicatorKernelType kernelType,
+int runKernel(const Device &device,
+              MultiplicatorKernelType kernelType,
               int M, int N, int K,
               const float *matrixA, const float *matrixB,
               const std::function<void(float *result)> &handler
