@@ -61,7 +61,7 @@ private:
      * m, n - result matrix dimension
      * k - common dimension of matrixA and matrixB
      */
-    std::pair<float *, cl::Event *> multiply(const float *matrixA, const float *matrixB, int m, int n, int k) const {
+    std::pair<float *, cl::Event *> multiply(float *matrixA, float *matrixB, int m, int n, int k) const {
         auto matrixC = new float[m * n];
         auto profilingEvent = new cl::Event;
 
@@ -118,7 +118,7 @@ public:
     }
 
     void runKernel(int M, int N, int K,
-                   const float *matrixA, const float *matrixB,
+                   float *matrixA, float *matrixB,
                    const std::function<void(float *result, cl::Event *profilingEvent, long executionTime)> &handler
     ) {
         try {
