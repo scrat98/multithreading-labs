@@ -51,5 +51,8 @@ __kernel void multiply_matrix(const int M, const int N, const int K,
         barrier(CLK_LOCAL_MEM_FENCE);
     }
 
+    if (globalRow >= M || globalCol >= N) {
+        return;
+    }
     C[N * globalRow + globalCol] = acc;
 }
