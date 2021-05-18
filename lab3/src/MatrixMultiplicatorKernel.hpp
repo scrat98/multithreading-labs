@@ -42,7 +42,7 @@ private:
             kernelFileName = "tiling";
         }
 
-        return "/home/ct/projects/multithreading-labs/lab3/src/kernels/" + kernelFileName + ".cl";
+        return "kernels/" + kernelFileName + ".cl";
     }
 
     static int roundUp(int numToRound, int multiple) {
@@ -57,7 +57,11 @@ public:
         this->kernelType = kernelType;
         this->context = cl::Context(device.getCLDevice());
 
-        std::ifstream sourceFile(getKernelFile(kernelType), std::ifstream::in | std::ifstream::binary);
+        auto kernelFleName = getKernelFile(kernelType);
+        std::ifstream sourceFile(kernelFleName, std::ifstream::in | std::ifstream::binary);
+        if (!sourceFile.is_open()) {
+            throw std::runtime_error("Could not open kernel file: " + kernelFleName);
+        }
         auto source = std::string(std::istreambuf_iterator<char>(sourceFile), std::istreambuf_iterator<char>());
         cl::Program::Sources sources({source});
         this->program = cl::Program(context, sources);
