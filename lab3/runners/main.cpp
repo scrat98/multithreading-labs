@@ -1,5 +1,5 @@
-#include "Runner.hpp"
 #include "../src/DeviceProvider.hpp"
+#include "../src/MatrixMultiplicatorKernel.hpp"
 #include <cstdio>
 #include <iostream>
 
@@ -43,6 +43,7 @@ int main(int argc, char *argv[]) {
             device = &devices[deviceNumber];
         }
         std::cout << "Selected device: " << device->getDeviceName() << std::endl;
+        auto calculator = MatrixMultiplicatorKernel(device, kernelType);
 
         std::ifstream matrixIn(matrixInFile);
         if (!matrixIn.is_open()) {
@@ -68,7 +69,7 @@ int main(int argc, char *argv[]) {
             matrixIn >> matrixB[i];
         }
 
-        runKernel(*device, kernelType, m, n, k, matrixA, matrixB, [&](
+        calculator.runKernel(m, n, k, matrixA, matrixB, [&](
                 float *result, cl::Event *profilingEvent, long executionTime
         ) {
             matrixOut << n << ' ' << m << std::endl;

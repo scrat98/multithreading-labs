@@ -1,5 +1,5 @@
 #include "../src/DeviceProvider.hpp"
-#include "Runner.hpp"
+#include "../src/MatrixMultiplicatorKernel.hpp"
 #include <iostream>
 #include <random>
 #include <cmath>
@@ -32,7 +32,11 @@ void multiplySimple(const float *matrixA, const float *matrixB, float *matrixC, 
 }
 
 int main() {
-    MultiplicatorKernelType kernelType = MultiplicatorKernelType::TILING;
+    MultiplicatorKernelType kernelType = MultiplicatorKernelType::NAIVE;
+    auto devices = DeviceProvider::getAll();
+    auto device = devices.front();
+    auto calculator = MatrixMultiplicatorKernel(&device, kernelType);
+
     int M = 32;
     int N = 32;
     int K = 32;
@@ -48,11 +52,8 @@ int main() {
                 std::cout << "Checking with params: m = " << m << " n = " << n << " k = " << k << std::endl;
                 multiplySimple(matrixA, matrixB, matrixC, m, n, k);
 
-                auto devices = DeviceProvider::getAll();
-                auto device = devices.front();
-
-                runKernel(device, kernelType, m, n, k, matrixA, matrixB, [&](
-                        float *result, cl::Event * profilingEvent, long executionTime
+                calculator.runKernel(m, n, k, matrixA, matrixB, [&](
+                        float *result, cl::Event *profilingEvent, long executionTime
                 ) {
                     for (int i = 0; i < n * m; i++) {
                         auto expected = matrixC[i];
