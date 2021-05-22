@@ -33,7 +33,8 @@ void multiplySimple(const float *matrixA, const float *matrixB, float *matrixC, 
 
 int main() {
     MultiplicatorKernelType kernelType = MultiplicatorKernelType::NAIVE;
-    auto devices = DeviceProvider::getAll();
+    auto openCLDevices = DeviceProvider::getOpenCLDevices();
+    auto devices = DeviceProvider::getDevices(openCLDevices);
     auto device = devices.front();
     auto calculator = MatrixMultiplicatorKernel(&device, kernelType);
 

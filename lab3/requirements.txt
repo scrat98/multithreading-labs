@@ -1,2 +1,3 @@
 sudo apt install ocl-icd-* opencl-headers intel-opencl-icd
 Intel® SDK for OpenCL™ Applications https://software.intel.com/content/www/us/en/develop/tools/opencl-sdk/choose-download.html
+https://software.intel.com/content/www/us/en/develop/articles/opencl-drivers.html

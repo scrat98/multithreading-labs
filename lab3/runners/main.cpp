@@ -24,7 +24,8 @@ int main(int argc, char *argv[]) {
             throw std::runtime_error("Kernel type not found");
         }
 
-        auto devices = DeviceProvider::getAll();
+        auto openCLDevices = DeviceProvider::getOpenCLDevices();
+        auto devices = DeviceProvider::getDevices(openCLDevices);
         if (devices.empty()) {
             throw std::runtime_error("No devices found");
         }
