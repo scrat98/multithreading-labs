@@ -4,7 +4,7 @@ project(multithreading_lab_3)
 set(CMAKE_CXX_STANDARD 20)
 
 find_package(OpenCL REQUIRED)
-message(STATUS "OpenCL found: ${OpenCL_LIBRARY}")
+message(STATUS "OpenCL found. Lib: ${OpenCL_LIBRARY}, Headers: ${OpenCL_INCLUDE_DIR}")
 function(build_with_openCL name)
     message("Building ${name} with OpenCL. Sources: ${ARGN}")
     add_executable(${name} ${ARGN})
