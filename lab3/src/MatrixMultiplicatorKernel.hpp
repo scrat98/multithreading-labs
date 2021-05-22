@@ -82,8 +82,8 @@ private:
         queue.enqueueNDRangeKernel(multiply_matrix,
                                    cl::NullRange,
                                    cl::NDRange(
-                                           roundUp(m, LOCAL_GROUP_DIMENSION_SIZE),
-                                           roundUp(n, LOCAL_GROUP_DIMENSION_SIZE)
+                                           roundUp(n, LOCAL_GROUP_DIMENSION_SIZE),
+                                           roundUp(m, LOCAL_GROUP_DIMENSION_SIZE)
                                    ),
                                    cl::NDRange(LOCAL_GROUP_DIMENSION_SIZE, LOCAL_GROUP_DIMENSION_SIZE),
                                    NULL, profilingEvent

@@ -5,11 +5,11 @@ __kernel void multiply_matrix(const int M, const int N, const int K,
                               __global const float *B,
                               __global float *C) {
 
-    const int localRow = get_local_id(0); // Local row (0..TILE_SIZE)
-    const int localCol = get_local_id(1); // Local col (0..TILE_SIZE)
+    const int localRow = get_local_id(1); // Local row (0..TILE_SIZE)
+    const int localCol = get_local_id(0); // Local col (0..TILE_SIZE)
 
-    const int tilesRow = get_group_id(0);
-    const int tilesCol = get_group_id(1);
+    const int tilesRow = get_group_id(1);
+    const int tilesCol = get_group_id(0);
 
     const int globalRow = TILE_SIZE * tilesRow + localRow; // Row (0..M)
     const int globalCol = TILE_SIZE * tilesCol + localCol; // Col (0..N)
