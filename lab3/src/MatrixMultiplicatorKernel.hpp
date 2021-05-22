@@ -122,9 +122,7 @@ private:
 
 public:
 
-    explicit MatrixMultiplicatorKernel(Device *device,
-                                       MultiplicatorKernelType kernelType = MultiplicatorKernelType::TILING
-    ) {
+    explicit MatrixMultiplicatorKernel(Device *device, MultiplicatorKernelType kernelType) {
         this->device = device;
         this->kernelType = kernelType;
     }

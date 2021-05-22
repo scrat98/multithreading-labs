@@ -20,6 +20,8 @@ int main(int argc, char *argv[]) {
             kernelType = MultiplicatorKernelType::NAIVE;
         } else if (kernelTypeId == 1) {
             kernelType = MultiplicatorKernelType::TILING;
+        } else if (kernelTypeId == 2) {
+            kernelType = MultiplicatorKernelType::VECTORS;
         } else {
             throw std::runtime_error("Kernel type not found");
         }
