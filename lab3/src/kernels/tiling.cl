@@ -1,4 +1,7 @@
-#define TILE_SIZE 16
+#ifndef TILE_SIZE
+#define TILE_SIZE -1
+#pragma message("TILE_SIZE need to be passed from the host")
+#endif
 
 __kernel void multiply_matrix(const int M, const int N, const int K,
                               __global const float *A,

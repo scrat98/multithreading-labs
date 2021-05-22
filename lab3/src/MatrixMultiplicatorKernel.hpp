@@ -11,7 +11,8 @@
 
 enum class MultiplicatorKernelType {
     NAIVE,
-    TILING
+    TILING,
+    VECTORS
 };
 
 class MatrixMultiplicatorKernel {
@@ -38,6 +39,7 @@ private:
     /*
      * Will automatically release resources. See detail::Wrapper destructor
      */
+    bool haveInitialized = false;
     cl::Context context;
     cl::Program program;
     cl::CommandQueue queue;
@@ -48,6 +50,8 @@ private:
             kernelFileName = "naive";
         } else if (kernelType == MultiplicatorKernelType::TILING) {
             kernelFileName = "tiling";
+        } else if (kernelType == MultiplicatorKernelType::VECTORS) {
+            kernelFileName = "vectors";
         }
 
         return "kernels/" + kernelFileName + ".cl";
@@ -55,6 +59,27 @@ private:
 
     static int roundUp(int numToRound, int multiple) {
         return ((numToRound + multiple - 1) / multiple) * multiple;
+    }
+
+    void initializeIfNeeded() {
+        if (haveInitialized) return;
+
+        this->context = cl::Context(*device->getCLDevice());
+
+        auto kernelFleName = getKernelFile(kernelType);
+        std::ifstream sourceFile(kernelFleName, std::ifstream::in | std::ifstream::binary);
+        if (!sourceFile.is_open()) {
+            throw std::runtime_error("Could not open kernel file: " + kernelFleName);
+        }
+        auto source = std::string(std::istreambuf_iterator<char>(sourceFile), std::istreambuf_iterator<char>());
+        cl::Program::Sources sources({source});
+        this->program = cl::Program(context, sources);
+        auto options = "-D TILE_SIZE=" + std::to_string(LOCAL_GROUP_DIMENSION_SIZE);
+        program.build(options.c_str());
+
+        this->queue = cl::CommandQueue(context, *device->getCLDevice(), CL_QUEUE_PROFILING_ENABLE);
+
+        haveInitialized = true;
     }
 
     /*
@@ -102,19 +127,6 @@ public:
     ) {
         this->device = device;
         this->kernelType = kernelType;
-        this->context = cl::Context(*device->getCLDevice());
-
-        auto kernelFleName = getKernelFile(kernelType);
-        std::ifstream sourceFile(kernelFleName, std::ifstream::in | std::ifstream::binary);
-        if (!sourceFile.is_open()) {
-            throw std::runtime_error("Could not open kernel file: " + kernelFleName);
-        }
-        auto source = std::string(std::istreambuf_iterator<char>(sourceFile), std::istreambuf_iterator<char>());
-        cl::Program::Sources sources({source});
-        this->program = cl::Program(context, sources);
-        program.build();
-
-        this->queue = cl::CommandQueue(context, *device->getCLDevice(), CL_QUEUE_PROFILING_ENABLE);
     }
 
     void runKernel(int M, int N, int K,
@@ -122,6 +134,7 @@ public:
                    const std::function<void(float *result, cl::Event *profilingEvent, long executionTime)> &handler
     ) {
         try {
+            this->initializeIfNeeded();
             std::pair<float *, cl::Event *> result;
             auto executionTime = measureTimeMillis([&] {
                 result = this->multiply(matrixA, matrixB, M, N, K);
