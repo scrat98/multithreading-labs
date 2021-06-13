@@ -33,6 +33,8 @@ private:
      */
     static const int LOCAL_GROUP_DIMENSION_SIZE = 16;
 
+    static const int VECTOR_SIZE = 2;
+
     Device *device;
     MultiplicatorKernelType kernelType;
 
@@ -74,7 +76,9 @@ private:
         auto source = std::string(std::istreambuf_iterator<char>(sourceFile), std::istreambuf_iterator<char>());
         cl::Program::Sources sources({source});
         this->program = cl::Program(context, sources);
-        auto options = "-D TILE_SIZE=" + std::to_string(LOCAL_GROUP_DIMENSION_SIZE);
+        auto options =
+                " -D TILE_SIZE=" + std::to_string(LOCAL_GROUP_DIMENSION_SIZE) +
+                " -D VECTOR_SIZE=" + std::to_string(VECTOR_SIZE);
         program.build(options.c_str());
 
         this->queue = cl::CommandQueue(context, *device->getCLDevice(), CL_QUEUE_PROFILING_ENABLE);
@@ -102,15 +106,26 @@ private:
         multiply_matrix.setArg(4, buffer_b);
         multiply_matrix.setArg(5, buffer_c);
 
+        int global[2] = {
+                roundUp(n, LOCAL_GROUP_DIMENSION_SIZE),
+                roundUp(m, LOCAL_GROUP_DIMENSION_SIZE)
+        };
+        int local[2] = {
+                LOCAL_GROUP_DIMENSION_SIZE,
+                LOCAL_GROUP_DIMENSION_SIZE
+        };
+
+        if (kernelType == MultiplicatorKernelType::VECTORS) {
+            global[0] /= VECTOR_SIZE;
+            local[0] /= VECTOR_SIZE;
+        }
+
         queue.enqueueWriteBuffer(buffer_a, CL_FALSE, 0, sizeof(float) * m * k, matrixA);
         queue.enqueueWriteBuffer(buffer_b, CL_FALSE, 0, sizeof(float) * k * n, matrixB);
         queue.enqueueNDRangeKernel(multiply_matrix,
                                    cl::NullRange,
-                                   cl::NDRange(
-                                           roundUp(n, LOCAL_GROUP_DIMENSION_SIZE),
-                                           roundUp(m, LOCAL_GROUP_DIMENSION_SIZE)
-                                   ),
-                                   cl::NDRange(LOCAL_GROUP_DIMENSION_SIZE, LOCAL_GROUP_DIMENSION_SIZE),
+                                   cl::NDRange(global[0], global[1]),
+                                   cl::NDRange(local[0], local[1]),
                                    NULL, profilingEvent
         );
         queue.enqueueReadBuffer(buffer_c, CL_TRUE, 0, sizeof(float) * m * n, matrixC);

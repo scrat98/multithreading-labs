@@ -32,15 +32,15 @@ void multiplySimple(const float *matrixA, const float *matrixB, float *matrixC, 
 }
 
 int main() {
-    MultiplicatorKernelType kernelType = MultiplicatorKernelType::NAIVE;
+    MultiplicatorKernelType kernelType = MultiplicatorKernelType::VECTORS;
     auto openCLDevices = DeviceProvider::getOpenCLDevices();
     auto devices = DeviceProvider::getDevices(openCLDevices);
     auto device = devices.front();
     auto calculator = MatrixMultiplicatorKernel(&device, kernelType);
 
-    int M = 32;
-    int N = 32;
-    int K = 32;
+    int M = 64;
+    int N = 64;
+    int K = 64;
     auto matrixA = new float[M * K];
     auto matrixB = new float[K * N];
     auto matrixC = new float[M * N];
