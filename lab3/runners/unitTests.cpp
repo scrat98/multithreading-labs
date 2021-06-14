@@ -47,6 +47,17 @@ int main() {
     fillMatrix(matrixA, M, K);
     fillMatrix(matrixB, K, N);
 
+//    calculator.runKernel(M, N, K, matrixA, matrixB, [&](
+//            float *result, cl::Event *profilingEvent, long executionTime
+//    ) {
+//        auto start = profilingEvent->getProfilingInfo<CL_PROFILING_COMMAND_START>();
+//        auto end = profilingEvent->getProfilingInfo<CL_PROFILING_COMMAND_END>();
+//
+//        std::cout << "Execution time (ms): " << executionTime << std::endl;
+//        std::cout << "Kernel time (ms): " << (end - start) / 1000000 << std::endl;
+//    });
+
+
     for (int m = 1; m < M; m++) {
         for (int n = 1; n < N; n++) {
             for (int k = 1; k < K; k++) {
