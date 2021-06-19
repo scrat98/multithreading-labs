@@ -51,7 +51,7 @@ int main(int argc, char *argv[]) {
         int n;
         arrayIn >> n;
 
-        float array[n];
+        auto array = new float[n];
         for (int i = 0; i < n; i++) {
             arrayIn >> array[i];
         }
